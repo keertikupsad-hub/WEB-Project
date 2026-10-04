@@ -137,5 +137,9 @@ This is intentional for a single-file hackathon demo. A production deployment wo
 - **SLA deadline tracking** — every complaint gets a resolution deadline. Overdue ones surface automatically at the top of the dashboard with hours-overdue displayed.
 - **Full audit timeline** — every action (submission, status change, merge, remark) is logged to a per-complaint timeline so there's a clear accountability trail.
 
-
+#### CONTRIBUTORS 
+## Keerti S Kupsad
+## Pradnya M P
+## Vandhana 
+## Laxmi Manur
 
