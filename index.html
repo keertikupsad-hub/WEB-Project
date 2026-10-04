@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSATM Complaint Box</title>
+<style>
+  :root{
+    --bg:#f4f6f9;
+    --card:#ffffff;
+    --border:#dfe3ea;
+    --text:#1f2530;
+    --muted:#6b7280;
+    --primary:#2f5d9e;
+    --primary-dark:#234a80;
+    --success:#1d9e75;
+    --success-bg:#e1f5ee;
+    --warning:#ba7517;
+    --warning-bg:#faeeda;
+    --danger:#a32d2d;
+    --danger-bg:#fcebeb;
+    --info:#185fa5;
+    --info-bg:#e6f1fb;
+    --purple:#534ab7;
+    --purple-bg:#eeedfe;
+    --radius:10px;
+    --radius-lg:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  header{
+    background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+    color:white;
+    padding:18px 32px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  header .htext h1{margin:0;font-size:20px;font-weight:600;}
+  header .htext p{margin:5px 0 0;font-size:12.5px;opacity:.9;}
+  .header-right{display:flex;align-items:center;gap:10px;}
+  .mode-badge{background:rgba(255,255,255,0.18);padding:6px 12px;border-radius:20px;font-size:12px;font-weight:500;}
+  .icon-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:white;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:500;}
+  .icon-btn:hover{background:rgba(255,255,255,0.25);}
+
+  .container{max-width:1150px;margin:0 auto;padding:24px 20px 60px;}
+
+  nav.tabs{display:flex;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:6px;margin-bottom:20px;flex-wrap:wrap;}
+  nav.tabs button{flex:1;min-width:110px;padding:10px 12px;border:none;border-radius:8px;background:transparent;color:var(--muted);font-size:13.5px;font-weight:500;cursor:pointer;transition:all .15s;}
+  nav.tabs button.active{background:var(--primary);color:white;}
+  nav.tabs button:not(.active):hover{background:#eef1f6;color:var(--text);}
+  nav.tabs button.hidden{display:none;}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:20px;}
+  .card h2{margin:0 0 6px;font-size:18px;font-weight:600;}
+  .card .subtext{margin:0 0 18px;font-size:13px;color:var(--muted);}
+  .card h3{margin:0 0 6px;font-size:15px;font-weight:600;}
+
+  .notice{display:flex;gap:10px;align-items:flex-start;background:var(--purple-bg);color:var(--purple);border-radius:10px;padding:12px 14px;font-size:13px;margin-bottom:18px;line-height:1.5;}
+  .notice strong{display:block;margin-bottom:2px;}
+  .notice.warn{background:var(--warning-bg);color:var(--warning);}
+  .notice.info{background:var(--info-bg);color:var(--info);}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:640px){.grid2{grid-template-columns:1fr;}}
+
+  label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:6px;}
+  input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;color:var(--text);}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(47,93,158,0.12);}
+  textarea{resize:vertical;min-height:90px;}
+  .field{margin-bottom:16px;}
+  .field .hint{font-size:11.5px;color:var(--muted);margin-top:4px;}
+  fieldset{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:16px;}
+  legend{font-size:13px;font-weight:500;color:var(--muted);padding:0 6px;}
+
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;border-radius:8px;border:1px solid var(--primary);background:var(--primary);color:#fff;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s;}
+  .btn:hover{background:var(--primary-dark);}
+  .btn.secondary{background:transparent;color:var(--primary);}
+  .btn.secondary:hover{background:#eef1f6;}
+  .btn.danger{background:transparent;color:var(--danger);border-color:var(--danger);}
+  .btn.danger:hover{background:var(--danger-bg);}
+  .btn.small{padding:6px 12px;font-size:12px;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .link-btn{background:none;border:none;color:var(--primary);font-size:13px;cursor:pointer;text-decoration:underline;padding:0;}
+
+  .stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+  @media(max-width:780px){.stats{grid-template-columns:repeat(2,1fr);}}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;text-align:center;}
+  .stat .num{font-size:24px;font-weight:700;color:var(--primary);}
+  .stat.alert .num{color:var(--danger);}
+  .stat .lbl{font-size:11.5px;color:var(--muted);margin-top:4px;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{text-align:left;padding:10px 12px;background:#f7f8fa;color:var(--muted);font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:10px 12px;border-bottom:1px solid #eef0f3;vertical-align:top;}
+  tr:hover td{background:#fafbfc;}
+  .table-wrap{overflow-x:auto;}
+
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap;}
+  .badge.cat{background:var(--info-bg);color:var(--info);}
+  .badge.status-pending{background:var(--warning-bg);color:var(--warning);}
+  .badge.status-progress{background:var(--info-bg);color:var(--info);}
+  .badge.status-resolved{background:var(--success-bg);color:var(--success);}
+  .badge.status-rejected{background:var(--danger-bg);color:var(--danger);}
+  .badge.prio-high{background:var(--danger-bg);color:var(--danger);}
+  .badge.prio-medium{background:var(--warning-bg);color:var(--warning);}
+  .badge.prio-low{background:#eef1f6;color:var(--muted);}
+  .badge.escalated{background:var(--danger-bg);color:var(--danger);}
+  .badge.anon{background:var(--purple-bg);color:var(--purple);}
+  .badge.dup{background:var(--warning-bg);color:var(--warning);}
+
+  .filters{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .filters select,.filters input{width:auto;min-width:140px;}
+
+  .empty{text-align:center;color:var(--muted);padding:40px 20px;font-size:14px;}
+
+  select.status-select{padding:5px 8px;font-size:12px;border-radius:6px;min-width:120px;}
+
+  .id-tag{font-family:ui-monospace,monospace;font-size:12.5px;color:var(--muted);}
+
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--success);color:white;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:500;box-shadow:0 4px 12px rgba(0,0,0,0.15);opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none;z-index:999;max-width:340px;}
+  .toast.show{opacity:1;transform:translateY(0);}
+
+  .report-section{margin-bottom:24px;}
+  .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .bar-label{width:140px;font-size:13px;color:var(--muted);flex-shrink:0;}
+  .bar-track{flex:1;height:18px;background:#eef0f3;border-radius:6px;overflow:hidden;}
+  .bar-fill{height:100%;background:var(--primary);border-radius:6px;}
+  .bar-val{width:34px;text-align:right;font-size:13px;font-weight:600;flex-shrink:0;}
+
+  .muted-note{font-size:12px;color:var(--muted);margin-top:8px;}
+  .actions-cell{display:flex;gap:6px;flex-wrap:wrap;}
+
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(20,24,32,0.5);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal-box{background:var(--card);border-radius:var(--radius-lg);max-width:560px;width:100%;max-height:85vh;overflow-y:auto;padding:26px;}
+  .modal-box h2{margin-top:0;}
+  .modal-close{float:right;cursor:pointer;font-size:20px;color:var(--muted);line-height:1;background:none;border:none;}
+
+  .detail-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eef0f3;font-size:13.5px;gap:10px;}
+  .detail-row span:first-child{color:var(--muted);flex-shrink:0;}
+  .detail-row span:last-child{font-weight:500;text-align:right;}
+
+  .timeline{margin-top:14px;}
+  .timeline-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #eef0f3;font-size:13px;}
+  .timeline-item:last-child{border-bottom:none;}
+  .timeline-dot{width:8px;height:8px;border-radius:50%;background:var(--primary);margin-top:5px;flex-shrink:0;}
+  .timeline-time{color:var(--muted);font-size:11.5px;}
+  .timeline-text{font-weight:500;}
+
+  .comment-box{background:#f7f8fa;border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:13px;}
+  .comment-meta{font-size:11px;color:var(--muted);margin-bottom:3px;display:flex;justify-content:space-between;}
+
+  .file-chip{display:inline-flex;align-items:center;gap:6px;background:var(--info-bg);color:var(--info);padding:4px 10px;border-radius:6px;font-size:12px;margin:2px 4px 2px 0;}
+
+  .login-wrap{max-width:400px;margin:50px auto;}
+  .login-wrap .card{margin-bottom:0;}
+  .login-tabs{display:flex;gap:6px;margin-bottom:18px;}
+  .login-tabs button{flex:1;padding:9px;border:1px solid var(--border);background:#fff;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);}
+  .login-tabs button.active{background:var(--primary);color:white;border-color:var(--primary);}
+
+  .lookup-result{margin-top:18px;}
+
+  .readonly-pill{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);background:#f0f1f4;padding:4px 10px;border-radius:6px;}
+
+  .merge-row{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;}
+  .merge-row input[type=checkbox]{width:auto;}
+
+  .dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px;}
+  @media(max-width:860px){.dash-grid{grid-template-columns:1fr;}}
+  .dash-widget{background:#fafbfc;border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;}
+  .dash-widget h4{margin:0 0 12px;font-size:13.5px;font-weight:600;color:var(--text);}
+  .donut-wrap{display:flex;align-items:center;gap:16px;}
+  .donut-legend{font-size:12px;color:var(--muted);flex:1;}
+  .donut-legend .leg-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+  .leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .sla-bar-wrap{display:flex;flex-direction:column;gap:10px;}
+  .sla-pill-row{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;}
+  .clickable-stat{cursor:pointer;}
+  .clickable-stat:hover{border-color:var(--primary);}
+
+  @media(max-width:480px){
+    header{padding:16px 18px;}
+    .stats{grid-template-columns:repeat(2,1fr);}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="htext">
+    <h1>DSATM Complaint Box</h1>
+    <p>Anonymous tracking &middot; admin-controlled status &middot; SLA reminders &middot; analytics</p>
+  </div>
+  <div class="header-right">
+    <span class="mode-badge" id="modeBadge">Not logged in</span>
+    <button class="icon-btn hidden" id="logoutBtn">Log out</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- LOGIN GATE -->
+  <div id="loginGate" class="login-wrap">
+    <div class="card">
+      <div class="login-tabs">
+        <button class="active" id="loginTabUser">Student login</button>
+        <button id="loginTabAdmin">Admin login</button>
+      </div>
+
+      <!-- STUDENT LOGIN -->
+      <div id="userLoginPanel">
+        <h2>Student access</h2>
+        <p class="subtext">No account needed. Use this only to recover a lost Complaint ID / PIN, or just go straight to submitting/tracking.</p>
+        <button class="btn" id="continueAsStudent" style="width:100%;justify-content:center;margin-bottom:14px;">Continue to student portal</button>
+        <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;">
+        <h3>Forgot your Complaint ID or PIN?</h3>
+        <div class="field">
+          <label for="recoverContact">Registered phone number or email</label>
+          <input type="text" id="recoverContact" placeholder="e.g. 9876543210 or you@email.com">
+        </div>
+        <button class="btn secondary" id="recoverBtn" style="width:100%;justify-content:center;">Send recovery via WhatsApp / Email</button>
+        <p id="recoverResult" class="muted-note" style="display:none;"></p>
+      </div>
+
+      <!-- ADMIN LOGIN -->
+      <div id="adminLoginPanel" style="display:none;">
+        <h2>Admin login</h2>
+        <p class="subtext">Demo credentials: <strong>admin</strong> / <strong>admin123</strong></p>
+        <div class="field">
+          <label for="adminUser">Username</label>
+          <input type="text" id="adminUser" placeholder="admin">
+        </div>
+        <div class="field">
+          <label for="adminPass">Password</label>
+          <input type="password" id="adminPass" placeholder="••••••••">
+        </div>
+        <button class="btn" id="adminLoginBtn" style="width:100%;justify-content:center;">Log in as admin</button>
+        <p id="loginError" style="color:var(--danger);font-size:13px;margin-top:10px;display:none;">Invalid username or password.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="mainApp" style="display:none;">
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="submit" id="tabSubmit">Submit complaint</button>
+      <button class="tab-btn" data-tab="lookup" id="tabLookup">Track a complaint</button>
+      <button class="tab-btn" data-tab="mycomplaints" id="tabMyComplaints">My complaints</button>
+      <button class="tab-btn" data-tab="browse" id="tabBrowse">Browse all complaints</button>
+      <button class="tab-btn" data-tab="reports" id="tabReportsUser">Analytics</button>
+      <button class="tab-btn hidden" data-tab="dashboard" id="tabDashboard">Admin dashboard</button>
+      <button class="tab-btn hidden" data-tab="adminreports" id="tabReportsAdmin">Reports</button>
+    </nav>
+
+    <div class="stats" id="statsBar"></div>
+
+    <!-- SUBMIT TAB -->
+    <div class="tab-panel" id="panel-submit">
+      <div class="card">
+        <h2>Submit a new complaint</h2>
+        <p class="subtext">Identity is kept private. Save your Complaint ID and PIN — you'll need them to track this complaint.</p>
+
+        <div class="notice">
+          <span><strong>Your name is never shown publicly.</strong> Phone/email below is stored privately and used only to recover your ID/PIN if you lose them — admin and other students never see it.</span>
+        </div>
+
+        <form id="complaintForm">
+          <fieldset>
+            <legend>Private contact (for recovery only — never shown to anyone)</legend>
+            <div class="grid2">
+              <div class="field">
+                <label for="contactPhone">WhatsApp number</label>
+                <input type="text" id="contactPhone" placeholder="e.g. 9876543210">
+              </div>
+              <div class="field">
+                <label for="contactEmail">Email</label>
+                <input type="email" id="contactEmail" placeholder="e.g. you@email.com">
+              </div>
+            </div>
+            <p class="hint">Provide at least one. Used solely to send your Complaint ID/PIN if you forget them.</p>
+          </fieldset>
+
+          <div class="grid2">
+            <div class="field">
+              <label for="department">Department (optional)</label>
+              <select id="department">
+                <option value="">Prefer not to say</option>
+                <option>Computer Science</option>
+                <option>Electronics & Communication</option>
+                <option>Mechanical</option>
+                <option>Civil</option>
+                <option>Electrical</option>
+                <option>Information Science</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="location">Location on campus</label>
+              <input type="text" id="location" required placeholder="e.g. Block C, 2nd floor">
+            </div>
+          </div>
+          <div class="field">
+            <label for="category">Category</label>
+            <select id="category" required>
+              <option value="">Select category</option>
+              <option>Infrastructure</option>
+              <option>Hostel</option>
+              <option>Mess / Canteen</option>
+              <option>Sanitation</option>
+              <option>IT / Network</option>
+              <option>Library</option>
+              <option>Academic</option>
+              <option>Transport</option>
+              <option>Ragging / Harassment</option>
+              <option>Other</option>
+            </select>
+            <p class="hint">Priority is set automatically by admin based on severity and how many similar complaints exist for this category + location — students cannot set it.</p>
+          </div>
+          <div class="field">
+            <label for="description">Complaint description</label>
+            <textarea id="description" required placeholder="Describe the issue in detail. Do not include your name."></textarea>
+          </div>
+          <div class="field">
+            <label for="attachment">Attach files / photos (optional, multiple allowed)</label>
+            <input type="file" id="attachment" accept="image/*,.pdf" multiple>
+            <p class="hint">Photos, screenshots, or PDFs related to the issue. Avoid images containing your face or ID card.</p>
+            <div id="attachmentPreview"></div>
+          </div>
+          <div class="field">
+            <label for="pin">Set a 4-digit secret PIN</label>
+            <input type="text" id="pin" required maxlength="4" pattern="[0-9]{4}" placeholder="e.g. 4821">
+            <p class="hint">Needed with your Complaint ID to track status later.</p>
+          </div>
+          <button type="submit" class="btn">Submit complaint</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- LOOKUP TAB -->
+    <div class="tab-panel" id="panel-lookup" style="display:none;">
+      <div class="card">
+        <h2>Track a complaint</h2>
+        <p class="subtext">Enter the Complaint ID and PIN you received at submission. You can only view — status and priority are set by admin only.</p>
+        <div class="grid2">
+          <div class="field">
+            <label for="lookupId">Complaint ID</label>
+            <input type="text" id="lookupId" placeholder="e.g. CMP-1001">
+          </div>
+          <div class="field">
+            <label for="lookupPin">Secret PIN</label>
+            <input type="text" id="lookupPin" maxlength="4" placeholder="4-digit PIN">
+          </div>
+        </div>
+        <button class="btn" id="lookupBtn">Check status</button>
+        <button class="link-btn" id="forgotLink" style="margin-left:12px;">Forgot ID/PIN?</button>
+        <p id="lookupError" style="color:var(--danger);font-size:13px;margin-top:10px;display:none;">No matching complaint found for that ID and PIN.</p>
+        <div class="lookup-result" id="lookupResult" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- MY COMPLAINTS (saved list, regular tracking without re-entering ID/PIN each time) -->
+    <div class="tab-panel" id="panel-mycomplaints" style="display:none;">
+      <div class="card">
+        <h2>My complaints</h2>
+        <p class="subtext">Complaints you've saved to this browser session for quick, regular tracking — no need to re-enter ID and PIN each time. Status auto-refreshes.</p>
+        <div id="myComplaintsList"></div>
+        <div class="empty" id="myComplaintsEmpty" style="display:none;">You haven't saved any complaints yet. Submit one, or use "Track a complaint" and save it from there.</div>
+        <p class="muted-note">This list is tied to this browser tab only. On a shared/public computer, don't save complaints here — use ID + PIN lookup instead.</p>
+      </div>
+    </div>
+
+    <!-- BROWSE ALL (read-only, for students) -->
+    <div class="tab-panel" id="panel-browse" style="display:none;">
+      <div class="card">
+        <h2>Browse all complaints</h2>
+        <p class="subtext">Read-only view of every complaint on campus, with submitter identity hidden. Sorted by priority (High first) so the most urgent issues surface at the top. Helps you see if your issue has already been reported.</p>
+        <div class="filters">
+          <select id="browseCategory"><option value="">All categories</option></select>
+          <select id="browseStatus">
+            <option value="">All statuses</option>
+            <option>Pending</option><option>In Progress</option><option>Resolved</option><option>Rejected</option>
+          </select>
+          <select id="browseSort">
+            <option value="priority">Sort: Priority (High → Low)</option>
+            <option value="newest">Sort: Newest first</option>
+            <option value="oldest">Sort: Oldest first</option>
+          </select>
+          <input type="text" id="browseSearch" placeholder="Search by ID or location">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Submitted</th><th>Category</th><th>Priority</th><th>Location</th><th>Status</th><th>Reported by</th></tr></thead>
+            <tbody id="browseTbody"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="browseEmpty" style="display:none;">No complaints found.</div>
+      </div>
+    </div>
+
+    <!-- USER ANALYTICS (read-only) -->
+    <div class="tab-panel" id="panel-reports" style="display:none;">
+      <div class="card">
+        <h2>Campus complaint analytics</h2>
+        <p class="subtext">Aggregated, anonymized statistics — no individual identities involved.</p>
+        <div class="report-section"><h3>Complaints by category</h3><div id="userReportCategory"></div></div>
+        <div class="report-section"><h3>Complaints by status</h3><div id="userReportStatus"></div></div>
+      </div>
+    </div>
+
+    <!-- ADMIN DASHBOARD -->
+    <div class="tab-panel" id="panel-dashboard" style="display:none;">
+      <div class="card">
+        <h2>Admin dashboard</h2>
+        <p class="subtext">Only admins can change priority and status. Submitter identity is never displayed, even here.</p>
+
+        <div id="overdueReminderBox"></div>
+        <div id="duplicateAlertBox"></div>
+
+        <div class="dash-grid" id="dashGrid"></div>
+
+        <div class="filters">
+          <select id="filterCategory"><option value="">All categories</option></select>
+          <select id="filterStatus">
+            <option value="">All statuses</option><option>Pending</option><option>In Progress</option><option>Resolved</option><option>Rejected</option>
+          </select>
+          <select id="filterPriority"><option value="">All priorities</option><option>High</option><option>Medium</option><option>Low</option></select>
+          <select id="filterOverdue"><option value="">All complaints</option><option value="overdue">Overdue only</option></select>
+          <input type="text" id="filterSearch" placeholder="Search by Complaint ID or location">
+        </div>
+        <div class="table-wrap">
+          <table id="complaintsTable">
+            <thead>
+              <tr><th>ID</th><th>Submitted</th><th>Category</th><th>Occurrences</th><th>Priority</th><th>SLA</th><th>Location</th><th>Files</th><th>Status</th><th>Flags</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="complaintsTbody"></tbody>
+          </table>
+        </div>
+        <div class="empty" id="trackEmpty" style="display:none;">No complaints found.</div>
+      </div>
+    </div>
+
+    <!-- ADMIN REPORTS -->
+    <div class="tab-panel" id="panel-adminreports" style="display:none;">
+      <div class="card">
+        <h2>Reports &amp; analytics</h2>
+        <div class="report-section"><h3>Complaints by category</h3><div id="reportByCategory"></div></div>
+        <div class="report-section"><h3>Complaints by status</h3><div id="reportByStatus"></div></div>
+        <div class="report-section"><h3>Complaints by priority</h3><div id="reportByPriority"></div></div>
+        <div class="report-section"><h3>Most frequent issues (by category + location)</h3><div id="reportFrequent"></div></div>
+        <div class="report-section"><h3>Average resolution time</h3><p id="avgResolution" style="font-size:14px;color:var(--muted);"></p></div>
+        <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
+          <button class="btn secondary" id="downloadCsv">Download report (CSV)</button>
+          <button class="btn danger" id="clearAll">Clear all data</button>
+        </div>
+        <p class="muted-note">Data is stored only in this browser tab and resets on reload. This file is not hosted at a public web address — to give DSATM students and staff one shared link (e.g. complaints.dsatm.edu.in), it would need to be deployed to a web server with a real backend database and a messaging API (e.g. Twilio) for WhatsApp/email recovery.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-box">
+    <button class="modal-close" id="closeModal">&times;</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+let complaints = [];
+let counter = 1000;
+let role = null; // 'student' | 'admin'
+
+const statusClassMap = { "Pending":"status-pending", "In Progress":"status-progress", "Resolved":"status-resolved", "Rejected":"status-rejected" };
+const prioClassMap = { "High":"prio-high", "Medium":"prio-medium", "Low":"prio-low" };
+const SLA_DAYS = { High: 3, Medium: 5, Low: 7 };
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+function fmtDate(ts){ return new Date(ts).toLocaleString('en-IN', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function hoursSince(ts){ return (Date.now()-ts)/3600000; }
+function slaHours(priority){ return (SLA_DAYS[priority] || 7) * 24; }
+function slaDeadline(c){ return c.timestamp + slaHours(c.priority) * 3600000; }
+function isOverdue(c){ return (c.status==='Pending'||c.status==='In Progress') && Date.now() > slaDeadline(c); }
+function hoursOverdue(c){ return Math.max(0, (Date.now() - slaDeadline(c)) / 3600000); }
+function hoursRemaining(c){ return (slaDeadline(c) - Date.now()) / 3600000; }
+function isEscalated(c){ return isOverdue(c); } // kept for backward compatibility with existing calls
+function escapeHtml(str){ const div=document.createElement('div'); div.textContent=str; return div.innerHTML; }
+function dupKey(category, location){ return (category.trim().toLowerCase()+'|'+location.trim().toLowerCase()); }
+
+/* ---------- LOGIN GATE ---------- */
+document.getElementById('loginTabUser').addEventListener('click', ()=>{
+  document.getElementById('loginTabUser').classList.add('active');
+  document.getElementById('loginTabAdmin').classList.remove('active');
+  document.getElementById('userLoginPanel').style.display='block';
+  document.getElementById('adminLoginPanel').style.display='none';
+});
+document.getElementById('loginTabAdmin').addEventListener('click', ()=>{
+  document.getElementById('loginTabAdmin').classList.add('active');
+  document.getElementById('loginTabUser').classList.remove('active');
+  document.getElementById('adminLoginPanel').style.display='block';
+  document.getElementById('userLoginPanel').style.display='none';
+});
+
+document.getElementById('continueAsStudent').addEventListener('click', ()=>{
+  role = 'student';
+  enterApp();
+});
+
+document.getElementById('adminLoginBtn').addEventListener('click', ()=>{
+  const u = document.getElementById('adminUser').value.trim();
+  const p = document.getElementById('adminPass').value.trim();
+  if(u==='admin' && p==='admin123'){
+    role = 'admin';
+    document.getElementById('loginError').style.display='none';
+    enterApp();
+  } else {
+    document.getElementById('loginError').style.display='block';
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', ()=>{
+  role = null;
+  document.getElementById('mainApp').style.display='none';
+  document.getElementById('loginGate').style.display='block';
+  document.getElementById('logoutBtn').classList.add('hidden');
+  document.getElementById('modeBadge').textContent = 'Not logged in';
+  showToast('Logged out');
+});
+
+/* Recovery (simulated) */
+document.getElementById('recoverBtn').addEventListener('click', ()=>{
+  const contact = document.getElementById('recoverContact').value.trim();
+  const resultEl = document.getElementById('recoverResult');
+  resultEl.style.display='block';
+  if(!contact){
+    resultEl.style.color = 'var(--danger)';
+    resultEl.textContent = 'Please enter your registered phone number or email.';
+    return;
+  }
+  const matches = complaints.filter(c => c.contactPhone===contact || c.contactEmail===contact);
+  if(matches.length===0){
+    resultEl.style.color = 'var(--danger)';
+    resultEl.textContent = 'No complaints found registered with that phone number or email.';
+    return;
+  }
+  resultEl.style.color = 'var(--success)';
+  const channel = contact.includes('@') ? 'Email' : 'WhatsApp';
+  resultEl.innerHTML = `[Simulated ${channel} message] Sent to ${escapeHtml(contact)}: You have ${matches.length} complaint(s) registered — ` +
+    matches.map(m=>`${m.id} (PIN: ${m.pin})`).join(', ') + '.';
+  showToast(`Recovery message simulated via ${channel}`);
+});
+
+document.getElementById('forgotLink').addEventListener('click', ()=>{
+  document.getElementById('modalContent').innerHTML = `
+    <h2>Recover Complaint ID / PIN</h2>
+    <div class="field">
+      <label for="modalRecoverContact">Registered phone number or email</label>
+      <input type="text" id="modalRecoverContact" placeholder="e.g. 9876543210 or you@email.com">
+    </div>
+    <button class="btn" style="width:100%;justify-content:center;" onclick="doModalRecover()">Send recovery via WhatsApp / Email</button>
+    <p id="modalRecoverResult" class="muted-note" style="margin-top:10px;"></p>
+  `;
+  document.getElementById('detailModal').classList.add('show');
+});
+
+function doModalRecover(){
+  const contact = document.getElementById('modalRecoverContact').value.trim();
+  const resultEl = document.getElementById('modalRecoverResult');
+  if(!contact){ resultEl.style.color='var(--danger)'; resultEl.textContent='Please enter your phone or email.'; return; }
+  const matches = complaints.filter(c => c.contactPhone===contact || c.contactEmail===contact);
+  if(matches.length===0){ resultEl.style.color='var(--danger)'; resultEl.textContent='No complaints found for that contact.'; return; }
+  const channel = contact.includes('@') ? 'Email' : 'WhatsApp';
+  resultEl.style.color='var(--success)';
+  resultEl.innerHTML = `[Simulated ${channel} message] Sent to ${escapeHtml(contact)}: ` + matches.map(m=>`${m.id} (PIN: ${m.pin})`).join(', ') + '.';
+  showToast(`Recovery message simulated via ${channel}`);
+}
+
+/* ---------- ENTER APP ---------- */
+function enterApp(){
+  document.getElementById('loginGate').style.display='none';
+  document.getElementById('mainApp').style.display='block';
+  document.getElementById('logoutBtn').classList.remove('hidden');
+
+  const studentTabs = ['tabSubmit','tabLookup','tabMyComplaints','tabBrowse','tabReportsUser'];
+  const adminTabs = ['tabDashboard','tabReportsAdmin'];
+
+  if(role==='student'){
+    document.getElementById('modeBadge').textContent = 'Student portal';
+    studentTabs.forEach(id=>document.getElementById(id).classList.remove('hidden'));
+    adminTabs.forEach(id=>document.getElementById(id).classList.add('hidden'));
+    switchTab('submit');
+  } else {
+    document.getElementById('modeBadge').textContent = 'Admin portal';
+    studentTabs.forEach(id=>document.getElementById(id).classList.add('hidden'));
+    adminTabs.forEach(id=>document.getElementById(id).classList.remove('hidden'));
+    switchTab('dashboard');
+  }
+  renderStats();
+}
+
+/* ---------- TAB SWITCHING ---------- */
+function switchTab(tabName){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  const map = {submit:'tabSubmit', lookup:'tabLookup', mycomplaints:'tabMyComplaints', browse:'tabBrowse', reports:'tabReportsUser', dashboard:'tabDashboard', adminreports:'tabReportsAdmin'};
+  document.getElementById(map[tabName]).classList.add('active');
+  document.querySelectorAll('.tab-panel').forEach(p=>p.style.display='none');
+  document.getElementById('panel-'+tabName).style.display='block';
+  if(tabName==='dashboard'){ renderTable(); renderDuplicateAlerts(); renderAdminOverdueReminders(); renderAdminCharts(); }
+  if(tabName==='adminreports') renderAdminReports();
+  if(tabName==='browse') renderBrowse();
+  if(tabName==='reports') renderUserReports();
+  if(tabName==='mycomplaints') renderMyComplaints();
+}
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=> switchTab(btn.dataset.tab));
+});
+
+/* ---------- MY COMPLAINTS (saved tracking list) ---------- */
+let savedComplaintRefs = []; // [{id, pin}]
+
+function saveToMyComplaints(id, pin){
+  if(savedComplaintRefs.some(r=>r.id===id)){ showToast('Already saved to My Complaints'); return; }
+  savedComplaintRefs.push({id, pin});
+  showToast(id + ' saved to My Complaints for regular tracking');
+}
+
+function renderMyComplaints(){
+  const container = document.getElementById('myComplaintsList');
+  const emptyEl = document.getElementById('myComplaintsEmpty');
+  const valid = savedComplaintRefs
+    .map(r => complaints.find(c => c.id===r.id && c.pin===r.pin))
+    .filter(Boolean);
+
+  if(valid.length===0){ container.innerHTML=''; emptyEl.style.display='block'; return; }
+  emptyEl.style.display='none';
+
+  container.innerHTML = valid.map(c=>{
+    const overdue = isOverdue(c);
+    const remaining = hoursRemaining(c);
+    return `
+    <div class="card" style="background:var(--bg);margin-bottom:14px;">
+      <div class="detail-row"><span>Complaint ID</span><span class="id-tag">${c.id}</span></div>
+      <div class="detail-row"><span>Category</span><span><span class="badge cat">${c.category}</span></span></div>
+      <div class="detail-row"><span>Priority</span><span><span class="badge ${prioClassMap[c.priority]}">${c.priority}</span></span></div>
+      <div class="detail-row"><span>Status</span><span><span class="badge ${statusClassMap[c.status]}">${c.status}</span>${overdue?' <span class="badge escalated">Overdue</span>':''}</span></div>
+      <div class="detail-row"><span>Resolution target</span><span>${overdue ? `<span style="color:var(--danger);">Overdue by ${hoursOverdue(c).toFixed(0)}h</span>` : (c.status==='Resolved'||c.status==='Rejected' ? 'Closed' : `${remaining.toFixed(0)}h remaining`)}</span></div>
+      ${c.mergedCount>1 ? `<div class="detail-row"><span>Similar reports</span><span><span class="badge dup">${c.mergedCount} students reported this</span></span></div>` : ''}
+      <div class="detail-row"><span>Submitted</span><span>${fmtDate(c.timestamp)}</span></div>
+      <h3 style="margin-top:14px;">Latest update</h3>
+      <p class="muted-note" style="margin:0;">${escapeHtml(c.timeline[c.timeline.length-1].text)} — ${fmtDate(c.timeline[c.timeline.length-1].time)}</p>
+      ${c.comments.length ? `<h3 style="margin-top:14px;">Latest admin remark</h3><div class="comment-box">${escapeHtml(c.comments[c.comments.length-1].text)}</div>` : ''}
+      <button class="btn small secondary" style="margin-top:10px;" onclick="removeFromMyComplaints('${c.id}')">Remove from this list</button>
+    </div>
+  `}).join('');
+}
+
+function removeFromMyComplaints(id){
+  savedComplaintRefs = savedComplaintRefs.filter(r=>r.id!==id);
+  renderMyComplaints();
+  showToast(id + ' removed from My Complaints');
+}
+
+
+let pendingAttachments = [];
+document.getElementById('attachment').addEventListener('change', function(e){
+  pendingAttachments = [];
+  const preview = document.getElementById('attachmentPreview');
+  preview.innerHTML = '';
+  const files = Array.from(e.target.files);
+  files.forEach(file=>{
+    const reader = new FileReader();
+    reader.onload = function(ev){
+      pendingAttachments.push({ name: file.name, dataUrl: ev.target.result, type: file.type });
+      preview.innerHTML = pendingAttachments.map(f=>`<span class="file-chip">📎 ${escapeHtml(f.name.slice(0,18))}</span>`).join('');
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+function computeAutoPriority(category, location){
+  const key = dupKey(category, location);
+  const occurrences = complaints.filter(c => dupKey(c.category, c.location) === key).length + 1; // +1 for the new one
+  if(occurrences >= 4) return 'High';
+  if(occurrences >= 2) return 'Medium';
+  return 'Low';
+}
+
+document.getElementById('complaintForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const pin = document.getElementById('pin').value.trim();
+  const phone = document.getElementById('contactPhone').value.trim();
+  const email = document.getElementById('contactEmail').value.trim();
+  if(!/^[0-9]{4}$/.test(pin)){ showToast('PIN must be exactly 4 digits'); return; }
+  if(!phone && !email){ showToast('Please provide a WhatsApp number or email for recovery purposes'); return; }
+
+  const category = document.getElementById('category').value;
+  const location = document.getElementById('location').value.trim();
+  const autoPriority = computeAutoPriority(category, location);
+  const key = dupKey(category, location);
+  const occurrenceCount = complaints.filter(c => dupKey(c.category, c.location) === key).length + 1;
+
+  const complaint = {
+    id: 'CMP-' + (counter++),
+    pin: pin,
+    contactPhone: phone || null,
+    contactEmail: email || null,
+    timestamp: Date.now(),
+    department: document.getElementById('department').value || 'Not specified',
+    location: location,
+    category: category,
+    priority: autoPriority,
+    priorityLocked: true, // students cannot change; admin can override
+    description: document.getElementById('description').value.trim(),
+    attachments: pendingAttachments.slice(),
+    status: 'Pending',
+    mergedCount: 1,
+    mergedIds: [],
+    comments: [],
+    timeline: [{ text:`Complaint submitted (auto-priority: ${autoPriority}, occurrence #${occurrenceCount} for this category+location)`, time: Date.now() }]
+  };
+  complaints.unshift(complaint);
+  savedComplaintRefs.push({id: complaint.id, pin: complaint.pin});
+  this.reset();
+  pendingAttachments = [];
+  document.getElementById('attachmentPreview').innerHTML = '';
+
+  showConfirmationModal(complaint, occurrenceCount);
+  renderStats();
+});
+
+function showConfirmationModal(c, occurrenceCount){
+  document.getElementById('modalContent').innerHTML = `
+    <h2>Complaint submitted</h2>
+    <div class="notice"><span><strong>Save these details now.</strong> Contact info is kept private and used only for recovery.</span></div>
+    <div class="detail-row"><span>Complaint ID</span><span class="id-tag" style="font-size:15px;">${c.id}</span></div>
+    <div class="detail-row"><span>Secret PIN</span><span class="id-tag" style="font-size:15px;">${c.pin}</span></div>
+    <div class="detail-row"><span>Auto-assigned priority</span><span><span class="badge ${prioClassMap[c.priority]}">${c.priority}</span></span></div>
+    <div class="detail-row"><span>Target resolution window</span><span>${SLA_DAYS[c.priority]} day${SLA_DAYS[c.priority]>1?'s':''}</span></div>
+    ${occurrenceCount>1 ? `<p class="muted-note">${occurrenceCount} students have now reported a similar issue (same category + location). Admin may merge these.</p>` : ''}
+    <p class="muted-note">This complaint has been added to "My Complaints" on this device for regular tracking. Only admin can change status or priority.</p>
+    <button class="btn" style="width:100%;justify-content:center;margin-top:10px;" onclick="closeModalFn()">Got it</button>
+  `;
+  document.getElementById('detailModal').classList.add('show');
+}
+
+/* ---------- LOOKUP ---------- */
+document.getElementById('lookupBtn').addEventListener('click', doLookup);
+function doLookup(){
+  const id = document.getElementById('lookupId').value.trim();
+  const pin = document.getElementById('lookupPin').value.trim();
+  const c = complaints.find(x=>x.id.toLowerCase()===id.toLowerCase() && x.pin===pin);
+  const resultEl = document.getElementById('lookupResult');
+  const errEl = document.getElementById('lookupError');
+  if(!c){ errEl.style.display='block'; resultEl.style.display='none'; return; }
+  errEl.style.display='none';
+  resultEl.style.display='block';
+  const overdue = isOverdue(c);
+  const closed = (c.status==='Resolved'||c.status==='Rejected');
+  resultEl.innerHTML = `
+    <div class="card" style="background:var(--bg);">
+      <div class="detail-row"><span>Complaint ID</span><span class="id-tag">${c.id}</span></div>
+      <div class="detail-row"><span>Category</span><span><span class="badge cat">${c.category}</span></span></div>
+      <div class="detail-row"><span>Priority</span><span><span class="badge ${prioClassMap[c.priority]}">${c.priority}</span> <span class="readonly-pill">set by admin</span></span></div>
+      <div class="detail-row"><span>Status</span><span><span class="badge ${statusClassMap[c.status]}">${c.status}</span> <span class="readonly-pill">set by admin</span>${overdue?' <span class="badge escalated">Overdue</span>':''}</span></div>
+      <div class="detail-row"><span>Resolution target</span><span>${closed ? 'Closed' : (overdue ? `<span style="color:var(--danger);">Overdue by ${hoursOverdue(c).toFixed(0)}h</span>` : `${hoursRemaining(c).toFixed(0)}h remaining (SLA: ${SLA_DAYS[c.priority]} day${SLA_DAYS[c.priority]>1?'s':''})`)}</span></div>
+      ${c.mergedCount>1 ? `<div class="detail-row"><span>Similar reports</span><span><span class="badge dup">${c.mergedCount} students reported this</span></span></div>` : ''}
+      <div class="detail-row"><span>Location</span><span>${escapeHtml(c.location)}</span></div>
+      <div class="detail-row"><span>Submitted</span><span>${fmtDate(c.timestamp)}</span></div>
+      <h3 style="margin-top:18px;">Status timeline</h3>
+      <div class="timeline">${c.timeline.map(t=>`<div class="timeline-item"><div class="timeline-dot"></div><div><div class="timeline-text">${escapeHtml(t.text)}</div><div class="timeline-time">${fmtDate(t.time)}</div></div></div>`).join('')}</div>
+      <h3 style="margin-top:18px;">Remarks from admin</h3>
+      <div>${c.comments.length? c.comments.map(cm=>`<div class="comment-box"><div class="comment-meta"><span>${cm.from}</span><span>${fmtDate(cm.time)}</span></div>${escapeHtml(cm.text)}</div>`).join('') : '<p class="muted-note">No remarks yet.</p>'}</div>
+      <button class="btn small" style="margin-top:14px;" onclick="saveToMyComplaints('${c.id}','${c.pin}')">Save to My Complaints for regular tracking</button>
+    </div>
+  `;
+}
+
+/* ---------- BROWSE ALL (read-only for students) ---------- */
+function renderBrowse(){
+  const catSel = document.getElementById('browseCategory');
+  const cats = [...new Set(complaints.map(c=>c.category))].sort();
+  const currentCat = catSel.value;
+  catSel.innerHTML = '<option value="">All categories</option>' + cats.map(c=>`<option ${c===currentCat?'selected':''}>${c}</option>`).join('');
+
+  const catF = catSel.value;
+  const statusF = document.getElementById('browseStatus').value;
+  const sortF = document.getElementById('browseSort').value;
+  const searchF = document.getElementById('browseSearch').value.toLowerCase();
+
+  let filtered = complaints.filter(c=>{
+    if(c.mergedInto) return false; // don't show merged-away duplicates in the public browse list
+    if(catF && c.category!==catF) return false;
+    if(statusF && c.status!==statusF) return false;
+    if(searchF && !(c.id.toLowerCase().includes(searchF) || c.location.toLowerCase().includes(searchF))) return false;
+    return true;
+  });
+
+  const prioRank = { High: 0, Medium: 1, Low: 2 };
+  if(sortF === 'priority'){
+    filtered.sort((a,b)=> prioRank[a.priority] - prioRank[b.priority] || b.timestamp - a.timestamp);
+  } else if(sortF === 'newest'){
+    filtered.sort((a,b)=> b.timestamp - a.timestamp);
+  } else if(sortF === 'oldest'){
+    filtered.sort((a,b)=> a.timestamp - b.timestamp);
+  }
+
+  const tbody = document.getElementById('browseTbody');
+  const emptyEl = document.getElementById('browseEmpty');
+  if(filtered.length===0){ tbody.innerHTML=''; emptyEl.style.display='block'; return; }
+  emptyEl.style.display='none';
+
+  tbody.innerHTML = filtered.map(c=>`
+    <tr>
+      <td><span class="id-tag">${c.id}</span></td>
+      <td>${fmtDate(c.timestamp)}</td>
+      <td><span class="badge cat">${c.category}</span></td>
+      <td><span class="badge ${prioClassMap[c.priority]}">${c.priority}</span></td>
+      <td>${escapeHtml(c.location)}${c.mergedCount>1?` <span class="badge dup">x${c.mergedCount}</span>`:''}</td>
+      <td><span class="badge ${statusClassMap[c.status]}">${c.status}</span>${isOverdue(c)?' <span class="badge escalated">Overdue</span>':''}</td>
+      <td><span class="badge anon">Anonymous</span></td>
+    </tr>
+  `).join('');
+}
+['browseCategory','browseStatus','browseSort','browseSearch'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', renderBrowse);
+  document.getElementById(id).addEventListener('change', renderBrowse);
+});
+
+/* ---------- USER ANALYTICS (read-only) ---------- */
+function renderUserReports(){
+  renderBarReport('userReportCategory', groupCount('category'));
+  renderBarReport('userReportStatus', groupCount('status'));
+}
+
+/* ---------- ADMIN DASHBOARD ---------- */
+function populateCategoryFilter(){
+  const sel = document.getElementById('filterCategory');
+  const current = sel.value;
+  const cats = [...new Set(complaints.map(c=>c.category))].sort();
+  sel.innerHTML = '<option value="">All categories</option>' + cats.map(c=>`<option ${c===current?'selected':''}>${c}</option>`).join('');
+}
+
+function renderStats(){
+  const total = complaints.filter(c=>!c.mergedInto).length;
+  const pending = complaints.filter(c=>c.status==='Pending' && !c.mergedInto).length;
+  const progress = complaints.filter(c=>c.status==='In Progress' && !c.mergedInto).length;
+  const resolved = complaints.filter(c=>c.status==='Resolved' && !c.mergedInto).length;
+  const overdue = complaints.filter(c=>!c.mergedInto && isOverdue(c)).length;
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat"><div class="num">${total}</div><div class="lbl">Total complaints</div></div>
+    <div class="stat"><div class="num">${pending}</div><div class="lbl">Pending</div></div>
+    <div class="stat"><div class="num">${progress}</div><div class="lbl">In progress</div></div>
+    <div class="stat"><div class="num">${resolved}</div><div class="lbl">Resolved</div></div>
+    <div class="stat alert"><div class="num">${overdue}</div><div class="lbl">Overdue past SLA</div></div>
+  `;
+}
+
+/* ---------- SLA OVERDUE REMINDERS (admin) ---------- */
+function renderAdminOverdueReminders(){
+  const overdueList = complaints.filter(c => !c.mergedInto && isOverdue(c))
+    .sort((a,b)=> hoursOverdue(b) - hoursOverdue(a));
+  const box = document.getElementById('overdueReminderBox');
+  if(overdueList.length===0){ box.innerHTML=''; return; }
+
+  box.innerHTML = `
+    <div class="notice warn">
+      <span>
+        <strong>⏰ Reminder: ${overdueList.length} complaint(s) have missed their SLA resolution window.</strong>
+        High priority issues should resolve within 3 days, Medium within 5 days, and Low within 7 days. Please action these as soon as possible:
+        <br><br>
+        ${overdueList.slice(0,5).map(c=>`<span class="id-tag">${c.id}</span> (${c.priority}, overdue by ${hoursOverdue(c).toFixed(0)}h) — ${escapeHtml(c.category)} at ${escapeHtml(c.location)}`).join('<br>')}
+        ${overdueList.length>5 ? `<br>...and ${overdueList.length-5} more.` : ''}
+      </span>
+    </div>
+  `;
+}
+
+function renderDuplicateAlerts(){
+  const groups = {};
+  complaints.forEach(c=>{
+    const key = dupKey(c.category, c.location);
+    if(!groups[key]) groups[key] = [];
+    groups[key].push(c);
+  });
+  const dupGroups = Object.values(groups).filter(g=>g.length>1);
+  const box = document.getElementById('duplicateAlertBox');
+  if(dupGroups.length===0){ box.innerHTML=''; return; }
+  box.innerHTML = `<div class="notice warn"><span><strong>${dupGroups.length} potential duplicate group(s) detected</strong> — same category + location reported by multiple complaints. <button class="link-btn" onclick="openMergeView()">Review and merge</button></span></div>`;
+}
+
+/* ---------- INTERACTIVE DASHBOARD WIDGETS ---------- */
+function renderAdminCharts(){
+  const active = complaints.filter(c=>!c.mergedInto);
+  const grid = document.getElementById('dashGrid');
+
+  // Donut: status breakdown
+  const statusColors = { Pending:'#ba7517', 'In Progress':'#185fa5', Resolved:'#1d9e75', Rejected:'#a32d2d' };
+  const statusCounts = {};
+  active.forEach(c=>{ statusCounts[c.status] = (statusCounts[c.status]||0) + c.mergedCount; });
+  const totalForDonut = Object.values(statusCounts).reduce((a,b)=>a+b,0) || 1;
+  let cumulative = 0;
+  const donutStops = Object.entries(statusCounts).map(([status,count])=>{
+    const start = (cumulative/totalForDonut)*100;
+    cumulative += count;
+    const end = (cumulative/totalForDonut)*100;
+    return `${statusColors[status]||'#ccc'} ${start}% ${end}%`;
+  }).join(', ');
+
+  // SLA compliance: how many overdue per priority
+  const prios = ['High','Medium','Low'];
+  const slaRows = prios.map(p=>{
+    const inThatPrio = active.filter(c=>c.priority===p && (c.status==='Pending'||c.status==='In Progress'));
+    const overdueCount = inThatPrio.filter(isOverdue).length;
+    const onTrack = inThatPrio.length - overdueCount;
+    const pct = inThatPrio.length ? Math.round((onTrack/inThatPrio.length)*100) : 100;
+    return {p, overdueCount, onTrack, total: inThatPrio.length, pct};
+  });
+
+  // Category bar (top 5)
+  const catCounts = {};
+  active.forEach(c=>{ catCounts[c.category] = (catCounts[c.category]||0) + c.mergedCount; });
+  const topCats = Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  const maxCat = topCats.length ? topCats[0][1] : 1;
+
+  grid.innerHTML = `
+    <div class="dash-widget">
+      <h4>Status breakdown</h4>
+      <div class="donut-wrap">
+        <svg width="90" height="90" viewBox="0 0 32 32" style="transform:rotate(-90deg);flex-shrink:0;">
+          <circle r="16" cx="16" cy="16" fill="transparent" stroke-width="32"
+            style="stroke:conic-gradient(${donutStops});" />
+        </svg>
+        <div class="donut-legend">
+          ${Object.entries(statusCounts).map(([s,c])=>`<div class="leg-row"><span class="leg-dot" style="background:${statusColors[s]||'#ccc'}"></span>${s}: ${c}</div>`).join('') || '<div class="leg-row">No data yet</div>'}
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-widget">
+      <h4>SLA compliance by priority</h4>
+      <div class="sla-bar-wrap">
+        ${slaRows.map(r=>`
+          <div>
+            <div class="sla-pill-row">
+              <span><span class="badge ${prioClassMap[r.p]}">${r.p}</span> (${SLA_DAYS[r.p]}d target)</span>
+              <span>${r.total ? r.pct+'% on track' : 'No open items'}</span>
+            </div>
+            <div class="bar-track" style="height:14px;margin-top:4px;">
+              <div class="bar-fill" style="width:${r.total?r.pct:100}%;background:${r.overdueCount>0?'var(--danger)':'var(--success)'};"></div>
+            </div>
+            ${r.overdueCount>0?`<div class="muted-note" style="margin-top:3px;color:var(--danger);">${r.overdueCount} overdue</div>`:''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="dash-widget">
+      <h4>Top categories by volume</h4>
+      ${topCats.length ? topCats.map(([cat,count])=>`
+        <div class="bar-row">
+          <div class="bar-label" style="width:110px;">${cat}</div>
+          <div class="bar-track"><div class="bar-fill" style="width:${(count/maxCat*100).toFixed(0)}%"></div></div>
+          <div class="bar-val">${count}</div>
+        </div>
+      `).join('') : '<p class="muted-note">No data yet</p>'}
+    </div>
+  `;
+
+  // Fix donut: CSS conic-gradient needs to be on background, not stroke — render via background instead
+  const donutSvgParent = grid.querySelector('.donut-wrap');
+  if(donutSvgParent){
+    const ring = document.createElement('div');
+    ring.style.width = '90px';
+    ring.style.height = '90px';
+    ring.style.borderRadius = '50%';
+    ring.style.flexShrink = '0';
+    ring.style.background = totalForDonut > 1 || Object.keys(statusCounts).length ? `conic-gradient(${donutStops})` : '#eee';
+    ring.style.position = 'relative';
+    const hole = document.createElement('div');
+    hole.style.position = 'absolute';
+    hole.style.inset = '18px';
+    hole.style.background = 'var(--card)';
+    hole.style.borderRadius = '50%';
+    ring.appendChild(hole);
+    const oldSvg = donutSvgParent.querySelector('svg');
+    if(oldSvg) donutSvgParent.replaceChild(ring, oldSvg);
+  }
+}
+
+function openMergeView(){
+  const groups = {};
+  complaints.forEach(c=>{
+    const key = dupKey(c.category, c.location);
+    if(!groups[key]) groups[key] = [];
+    groups[key].push(c);
+  });
+  const dupGroups = Object.entries(groups).filter(([k,g])=>g.length>1);
+  if(dupGroups.length===0){ showToast('No duplicate groups found'); return; }
+
+  document.getElementById('modalContent').innerHTML = `
+    <h2>Merge duplicate complaints</h2>
+    <p class="subtext">Complaints with the same category and location. Select which to merge into one, keeping a combined occurrence count.</p>
+    ${dupGroups.map(([key,group], gi)=>`
+      <div style="margin-bottom:20px;">
+        <h3>${group[0].category} — ${escapeHtml(group[0].location)}</h3>
+        ${group.map(c=>`
+          <div class="merge-row">
+            <input type="checkbox" class="merge-check" data-group="${gi}" value="${c.id}" checked>
+            <div style="flex:1;">
+              <span class="id-tag">${c.id}</span> — ${escapeHtml(c.description.slice(0,60))}${c.description.length>60?'...':''}
+              <br><span class="muted-note">Submitted ${fmtDate(c.timestamp)} &middot; Status: ${c.status} &middot; Currently counts as ${c.mergedCount}</span>
+            </div>
+          </div>
+        `).join('')}
+        <button class="btn small" onclick="mergeGroup(${gi})">Merge selected in this group</button>
+      </div>
+    `).join('')}
+    <p class="muted-note">Merging keeps the earliest complaint as the primary record, sums occurrence counts, and combines descriptions/attachments. Students tracking the merged-away IDs will still see their own status via their original ID + PIN, linked to the merged record.</p>
+  `;
+  window._mergeGroups = dupGroups;
+  document.getElementById('detailModal').classList.add('show');
+}
+
+function mergeGroup(gi){
+  const checks = document.querySelectorAll(`.merge-check[data-group="${gi}"]:checked`);
+  const ids = Array.from(checks).map(c=>c.value);
+  if(ids.length<2){ showToast('Select at least 2 complaints to merge'); return; }
+
+  const toMerge = complaints.filter(c=>ids.includes(c.id)).sort((a,b)=>a.timestamp-b.timestamp);
+  const primary = toMerge[0];
+  const others = toMerge.slice(1);
+
+  primary.mergedCount = toMerge.reduce((sum,c)=>sum+c.mergedCount, 0);
+  primary.mergedIds = [...primary.mergedIds, ...others.map(o=>o.id), ...others.flatMap(o=>o.mergedIds)];
+  primary.attachments = primary.attachments.concat(others.flatMap(o=>o.attachments));
+  primary.timeline.push({ text:`Merged with ${others.map(o=>o.id).join(', ')} — combined occurrence count: ${primary.mergedCount}`, time: Date.now() });
+
+  // Recompute priority based on merged frequency
+  if(primary.mergedCount >= 4) primary.priority = 'High';
+  else if(primary.mergedCount >= 2) primary.priority = 'Medium';
+
+  // Remove the merged-away complaints from the active list but keep them resolvable by their own ID+PIN by redirecting
+  others.forEach(o=>{
+    o.mergedInto = primary.id;
+    o.status = primary.status;
+    o.timeline.push({ text:`This complaint was merged into ${primary.id} (same issue reported by multiple students)`, time: Date.now() });
+  });
+
+  showToast(`Merged ${ids.length} complaints into ${primary.id} (occurrence count: ${primary.mergedCount})`);
+  closeModalFn();
+  renderTable();
+  renderDuplicateAlerts();
+  renderStats();
+  renderAdminCharts();
+  renderAdminOverdueReminders();
+}
+
+function renderTable(){
+  populateCategoryFilter();
+  const catF = document.getElementById('filterCategory').value;
+  const statusF = document.getElementById('filterStatus').value;
+  const prioF = document.getElementById('filterPriority').value;
+  const overdueF = document.getElementById('filterOverdue').value;
+  const searchF = document.getElementById('filterSearch').value.toLowerCase();
+
+  let filtered = complaints.filter(c=>{
+    if(catF && c.category!==catF) return false;
+    if(statusF && c.status!==statusF) return false;
+    if(prioF && c.priority!==prioF) return false;
+    if(overdueF==='overdue' && !isOverdue(c)) return false;
+    if(searchF && !(c.id.toLowerCase().includes(searchF) || c.location.toLowerCase().includes(searchF))) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById('complaintsTbody');
+  const emptyEl = document.getElementById('trackEmpty');
+  if(filtered.length===0){ tbody.innerHTML=''; emptyEl.style.display='block'; return; }
+  emptyEl.style.display='none';
+
+  tbody.innerHTML = filtered.map(c=>{
+    const closed = (c.status==='Resolved'||c.status==='Rejected');
+    const overdue = isOverdue(c);
+    const slaText = closed ? 'Closed' : (overdue ? `<span style="color:var(--danger);font-weight:600;">${hoursOverdue(c).toFixed(0)}h overdue</span>` : `${hoursRemaining(c).toFixed(0)}h left`);
+    return `
+    <tr style="${c.mergedInto?'opacity:0.55;':''}">
+      <td><span class="id-tag">${c.id}</span><br><span class="badge anon" style="margin-top:4px;">Anonymous</span>${c.mergedInto?`<br><span class="muted-note">→ merged into ${c.mergedInto}</span>`:''}</td>
+      <td>${fmtDate(c.timestamp)}</td>
+      <td><span class="badge cat">${c.category}</span></td>
+      <td>${c.mergedCount>1?`<span class="badge dup">${c.mergedCount} students</span>`:'1'}</td>
+      <td>
+        <select class="status-select" onchange="updatePriority('${c.id}', this.value)" ${c.mergedInto?'disabled':''}>
+          <option ${c.priority==='Low'?'selected':''}>Low</option>
+          <option ${c.priority==='Medium'?'selected':''}>Medium</option>
+          <option ${c.priority==='High'?'selected':''}>High</option>
+        </select>
+      </td>
+      <td style="font-size:12px;">${slaText}</td>
+      <td>${escapeHtml(c.location)}</td>
+      <td>${c.attachments && c.attachments.length ? c.attachments.map(f=>`<span class="file-chip">📎</span>`).join('') : '<span class="muted-note">None</span>'}</td>
+      <td>
+        <select class="status-select" onchange="updateStatus('${c.id}', this.value)" ${c.mergedInto?'disabled':''}>
+          <option ${c.status==='Pending'?'selected':''}>Pending</option>
+          <option ${c.status==='In Progress'?'selected':''}>In Progress</option>
+          <option ${c.status==='Resolved'?'selected':''}>Resolved</option>
+          <option ${c.status==='Rejected'?'selected':''}>Rejected</option>
+        </select>
+      </td>
+      <td>${overdue ? '<span class="badge escalated">Overdue</span>' : ''}</td>
+      <td class="actions-cell"><button class="btn small secondary" onclick="openDetail('${c.id}')">View / comment</button></td>
+    </tr>
+  `}).join('');
+}
+
+function updateStatus(id, newStatus){
+  const c = complaints.find(x=>x.id===id);
+  if(c){
+    c.status = newStatus;
+    c.timeline.push({ text:'Status changed to "'+newStatus+'" by admin', time: Date.now() });
+    showToast(id + ' status updated to "' + newStatus + '" — notification simulated to submitter');
+    renderStats(); renderTable(); renderAdminOverdueReminders(); renderAdminCharts(); renderDuplicateAlerts();
+  }
+}
+function updatePriority(id, newPriority){
+  const c = complaints.find(x=>x.id===id);
+  if(c){
+    c.priority = newPriority;
+    c.priorityLocked = false;
+    c.timeline.push({ text:'Priority manually set to "'+newPriority+'" by admin', time: Date.now() });
+    showToast(id + ' priority updated to "' + newPriority + '" by admin (SLA target now ' + SLA_DAYS[newPriority] + ' days)');
+    renderTable(); renderAdminOverdueReminders(); renderAdminCharts();
+  }
+}
+
+function openDetail(id){
+  const c = complaints.find(x=>x.id===id);
+  if(!c) return;
+  document.getElementById('modalContent').innerHTML = `
+    <h2>${c.id} <span class="badge anon">Anonymous submitter</span></h2>
+    <div class="detail-row"><span>Category</span><span><span class="badge cat">${c.category}</span></span></div>
+    <div class="detail-row"><span>Priority</span><span><span class="badge ${prioClassMap[c.priority]}">${c.priority}</span> ${c.priorityLocked?'<span class="readonly-pill">auto-assigned</span>':'<span class="readonly-pill">admin override</span>'}</span></div>
+    <div class="detail-row"><span>Status</span><span><span class="badge ${statusClassMap[c.status]}">${c.status}</span></span></div>
+    <div class="detail-row"><span>Occurrences</span><span>${c.mergedCount} report(s)${c.mergedIds.length?' — merged from: '+c.mergedIds.join(', '):''}</span></div>
+    <div class="detail-row"><span>Department</span><span>${escapeHtml(c.department)}</span></div>
+    <div class="detail-row"><span>Location</span><span>${escapeHtml(c.location)}</span></div>
+    <div class="detail-row"><span>Submitted</span><span>${fmtDate(c.timestamp)}</span></div>
+    <h3 style="margin-top:16px;">Description</h3>
+    <p style="font-size:13.5px;">${escapeHtml(c.description)}</p>
+    ${c.attachments && c.attachments.length ? `<h3 style="margin-top:16px;">Attachments (${c.attachments.length})</h3>` + c.attachments.map(f=> f.type && f.type.startsWith('image') ? `<img src="${f.dataUrl}" style="max-width:100%;border-radius:8px;border:1px solid var(--border);margin-bottom:8px;">` : `<div class="file-chip">📎 ${escapeHtml(f.name)}</div>`).join('') : ''}
+    <h3 style="margin-top:16px;">Add a remark / comment</h3>
+    <textarea id="newComment" placeholder="Visible to the anonymous submitter via their tracking lookup..."></textarea>
+    <button class="btn small" style="margin-top:8px;" onclick="addComment('${c.id}')">Post remark</button>
+    <h3 style="margin-top:16px;">Existing remarks</h3>
+    <div id="commentsList">${c.comments.length ? c.comments.map(cm=>`<div class="comment-box"><div class="comment-meta"><span>${cm.from}</span><span>${fmtDate(cm.time)}</span></div>${escapeHtml(cm.text)}</div>`).join('') : '<p class="muted-note">No remarks yet.</p>'}</div>
+  `;
+  document.getElementById('detailModal').classList.add('show');
+}
+
+function addComment(id){
+  const c = complaints.find(x=>x.id===id);
+  const text = document.getElementById('newComment').value.trim();
+  if(!text) return;
+  c.comments.push({ from:'Admin', text, time: Date.now() });
+  c.timeline.push({ text:'Admin posted a remark', time: Date.now() });
+  showToast('Remark posted — notification simulated to submitter');
+  openDetail(id);
+  renderTable();
+}
+
+document.getElementById('closeModal').addEventListener('click', closeModalFn);
+document.getElementById('detailModal').addEventListener('click', (e)=>{ if(e.target.id==='detailModal') closeModalFn(); });
+function closeModalFn(){ document.getElementById('detailModal').classList.remove('show'); }
+
+['filterCategory','filterStatus','filterPriority','filterOverdue','filterSearch'].forEach(id=>{
+  const el = document.getElementById(id);
+  el.addEventListener('input', renderTable);
+  el.addEventListener('change', renderTable);
+});
+
+/* ---------- REPORTS ---------- */
+function groupCount(field){
+  const active = complaints.filter(c=>!c.mergedInto);
+  const map = {};
+  active.forEach(c=>{ map[c[field]] = (map[c[field]]||0) + c.mergedCount; });
+  return map;
+}
+function renderBarReport(containerId, dataMap){
+  const container = document.getElementById(containerId);
+  const entries = Object.entries(dataMap).sort((a,b)=>b[1]-a[1]);
+  if(entries.length===0){ container.innerHTML = '<p class="empty" style="padding:10px 0;">No data yet</p>'; return; }
+  const max = Math.max(...entries.map(e=>e[1]));
+  container.innerHTML = entries.map(([label,val])=>`
+    <div class="bar-row">
+      <div class="bar-label">${label}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(val/max*100).toFixed(0)}%"></div></div>
+      <div class="bar-val">${val}</div>
+    </div>
+  `).join('');
+}
+function renderAdminReports(){
+  renderBarReport('reportByCategory', groupCount('category'));
+  renderBarReport('reportByStatus', groupCount('status'));
+  renderBarReport('reportByPriority', groupCount('priority'));
+  renderFrequentIssues();
+  renderAvgResolution();
+}
+function renderFrequentIssues(){
+  const active = complaints.filter(c=>!c.mergedInto && c.mergedCount>1).sort((a,b)=>b.mergedCount-a.mergedCount);
+  const container = document.getElementById('reportFrequent');
+  if(active.length===0){ container.innerHTML = '<p class="empty" style="padding:10px 0;">No repeated issues yet</p>'; return; }
+  container.innerHTML = active.slice(0,8).map(c=>`
+    <div class="bar-row">
+      <div class="bar-label" style="width:220px;">${c.category} — ${escapeHtml(c.location.slice(0,18))}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,c.mergedCount*20)}%"></div></div>
+      <div class="bar-val">${c.mergedCount}</div>
+    </div>
+  `).join('');
+}
+function renderAvgResolution(){
+  const resolved = complaints.filter(c=>c.status==='Resolved' && !c.mergedInto);
+  if(resolved.length===0){ document.getElementById('avgResolution').textContent = 'No resolved complaints yet.'; return; }
+  const totalHours = resolved.reduce((sum,c)=>{
+    const submitted = c.timeline.find(t=>t.text.includes('submitted'));
+    const resolvedEntry = [...c.timeline].reverse().find(t=>t.text.includes('Resolved'));
+    if(submitted && resolvedEntry) return sum + (resolvedEntry.time - submitted.time)/3600000;
+    return sum;
+  }, 0);
+  document.getElementById('avgResolution').textContent = `${(totalHours/resolved.length).toFixed(1)} hours on average across ${resolved.length} resolved complaint(s).`;
+}
+
+document.getElementById('downloadCsv').addEventListener('click', ()=>{
+  if(complaints.length===0){ showToast('No data to export'); return; }
+  const headers = ['ID','Submitted','Department','Location','Category','Priority','Status','Occurrences','Escalated','Description'];
+  const rows = complaints.filter(c=>!c.mergedInto).map(c=>[c.id,fmtDate(c.timestamp),c.department,c.location,c.category,c.priority,c.status,c.mergedCount,isEscalated(c)?'Yes':'No',c.description.replace(/,/g,';')]);
+  const csv = [headers.join(','), ...rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'campus_complaints_report.csv'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Report downloaded (no contact/identity fields included)');
+});
+
+document.getElementById('clearAll').addEventListener('click', ()=>{
+  if(confirm('Clear all complaint records? This cannot be undone.')){
+    complaints = [];
+    renderStats(); renderTable(); renderAdminReports();
+    showToast('All data cleared');
+  }
+});
+
+/* ---------- SEED DATA ---------- */
+complaints = [
+  {id:'CMP-1001', pin:'1111', contactPhone:'9876543210', contactEmail:null, timestamp:Date.now()-300*3600000, department:'Not specified', location:'Hostel Block A', category:'Hostel', priority:'High', priorityLocked:false, description:'Water leakage in room 204 causing damage to belongings.', attachments:[], status:'In Progress', mergedCount:3, mergedIds:['CMP-0998','CMP-0999'], comments:[{from:'Admin',text:'Plumbing team assigned, visit scheduled this week.',time:Date.now()-100*3600000}], timeline:[{text:'Complaint submitted (auto-priority: Medium, occurrence #1 for this category+location)',time:Date.now()-300*3600000},{text:'Merged with CMP-0998, CMP-0999 — combined occurrence count: 3',time:Date.now()-250*3600000},{text:'Status changed to "In Progress" by admin',time:Date.now()-150*3600000},{text:'Admin posted a remark',time:Date.now()-100*3600000}]},
+  {id:'CMP-1002', pin:'2222', contactPhone:null, contactEmail:'student2@email.com', timestamp:Date.now()-90*3600000, department:'Not specified', location:'Main Library', category:'Library', priority:'Low', priorityLocked:true, description:'AC not working in the reading hall, causing discomfort.', attachments:[], status:'Pending', mergedCount:1, mergedIds:[], comments:[], timeline:[{text:'Complaint submitted (auto-priority: Low, occurrence #1 for this category+location)',time:Date.now()-90*3600000}]},
+  {id:'CMP-1003', pin:'3333', contactPhone:'9123456780', contactEmail:null, timestamp:Date.now()-400*3600000, department:'Not specified', location:'Block C, Wi-Fi Zone', category:'IT / Network', priority:'Medium', priorityLocked:false, description:'Wi-Fi connectivity extremely slow near Block C labs.', attachments:[], status:'Resolved', mergedCount:2, mergedIds:['CMP-0995'], comments:[{from:'Admin',text:'Router replaced, speeds restored.',time:Date.now()-200*3600000}], timeline:[{text:'Complaint submitted (auto-priority: Medium, occurrence #2 for this category+location)',time:Date.now()-400*3600000},{text:'Status changed to "In Progress" by admin',time:Date.now()-300*3600000},{text:'Status changed to "Resolved" by admin',time:Date.now()-200*3600000}]},
+  {id:'CMP-1004', pin:'4444', contactPhone:null, contactEmail:'student4@email.com', timestamp:Date.now()-80*3600000, department:'Not specified', location:'Canteen', category:'Mess / Canteen', priority:'Medium', priorityLocked:true, description:'Food quality has declined; frequent complaints about stale items.', attachments:[], status:'Pending', mergedCount:1, mergedIds:[], comments:[], timeline:[{text:'Complaint submitted (auto-priority: Medium, occurrence #1 for this category+location)',time:Date.now()-80*3600000}]},
+];
+counter = 1005;
+</script>
+
+</body>
+</html>
